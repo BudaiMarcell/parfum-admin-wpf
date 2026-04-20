@@ -37,15 +37,21 @@ namespace ParfumAdmin_WPF
             services.AddTransient<ProductsViewModel>();
             services.AddTransient<OrdersViewModel>();
             services.AddTransient<DashboardViewModel>();
+            services.AddTransient<ProductFormViewModel>();
+            services.AddTransient<CouponsViewModel>();
+            services.AddTransient<CouponFormViewModel>();
 
             // Views regisztrálása
             services.AddTransient<LoginWindow>();
             services.AddTransient<MainWindow>();
+            services.AddTransient<ProductFormWindow>();
+            services.AddTransient<CouponFormWindow>();
 
             // Pages regisztrálása
             services.AddTransient<DashboardPage>();
             services.AddTransient<ProductsPage>();
             services.AddTransient<OrdersPage>();
+            services.AddTransient<CouponsPage>();
 
             ServiceProvider = services.BuildServiceProvider();
 

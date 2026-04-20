@@ -1,4 +1,4 @@
-﻿<Page x:Class="ParfumAdmin_WPF.Views.Pages.ProductsPage"
+<Page x:Class="ParfumAdmin_WPF.Views.Pages.CouponsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Loaded="Page_Loaded"
@@ -9,90 +9,49 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <!-- Tömeges műveletek sor fix magassága, hogy ne mozgassa a táblázatot -->
-            <RowDefinition Height="62"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Fejléc -->
         <StackPanel Grid.Row="0" Margin="0,0,0,24">
-            <TextBlock Text="Termékkezelés"
+            <TextBlock Text="Kuponkezelés"
                        FontSize="24"
                        FontWeight="Bold"
                        Foreground="White"/>
-            <TextBlock Text="Termékek listázása, szerkesztése és törlése"
+            <TextBlock Text="Globális kuponok létrehozása, szerkesztése és törlése"
                        FontSize="13"
                        Foreground="#888"
                        Margin="0,4,0,0"/>
         </StackPanel>
 
-        <!-- Szűrők (nem, kategória, alacsony készlet, visszaállítás) -->
+        <!-- Szűrők -->
         <Grid Grid.Row="1" Margin="0,0,0,12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                <TextBlock Text="Nem"
+                <TextBlock Text="Típus"
                            Foreground="#AAA"
                            FontSize="12"
                            Margin="0,0,0,6"/>
-                <ComboBox ItemsSource="{Binding GenderOptions}"
-                          SelectedItem="{Binding SelectedGender}"/>
+                <ComboBox ItemsSource="{Binding DiscountTypeOptions}"
+                          SelectedItem="{Binding SelectedDiscountType}"/>
             </StackPanel>
 
             <StackPanel Grid.Column="1" Margin="0,0,12,0">
-                <TextBlock Text="Kategória"
+                <TextBlock Text="Állapot"
                            Foreground="#AAA"
                            FontSize="12"
                            Margin="0,0,0,6"/>
-                <ComboBox ItemsSource="{Binding Categories}"
-                          SelectedItem="{Binding SelectedCategory}"
-                          DisplayMemberPath="Name"/>
+                <ComboBox ItemsSource="{Binding StatusOptions}"
+                          SelectedItem="{Binding SelectedStatus}"/>
             </StackPanel>
 
-            <ToggleButton Grid.Column="2"
-                          Content="⚠ Csak alacsony készlet"
-                          IsChecked="{Binding ShowLowStock}"
-                          Padding="16,8"
-                          Foreground="White"
-                          BorderThickness="0"
-                          VerticalAlignment="Bottom"
-                          Margin="0,0,8,0"
-                          Cursor="Hand">
-                <ToggleButton.Style>
-                    <Style TargetType="ToggleButton">
-                        <Setter Property="Background" Value="#2A2A3E"/>
-                        <Setter Property="FontSize" Value="13"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ToggleButton">
-                                    <Border Background="{TemplateBinding Background}"
-                                            CornerRadius="6"
-                                            Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter HorizontalAlignment="Center"
-                                                          VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#3D3D5E"/>
-                            </Trigger>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Background" Value="#EA580C"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </ToggleButton.Style>
-            </ToggleButton>
-
-            <Button Grid.Column="3"
+            <Button Grid.Column="2"
                     Content="♻ Szűrők törlése"
                     Command="{Binding ResetFiltersCommand}"
                     Padding="16,8"
@@ -119,7 +78,7 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                <TextBlock Text="Keresés (név vagy leírás)"
+                <TextBlock Text="Keresés (kuponkód)"
                            Foreground="#AAA"
                            FontSize="12"
                            Margin="0,0,0,6"/>
@@ -140,19 +99,13 @@
 
             <Button Grid.Column="1"
                     Content="➕ Hozzáadás"
-                    Command="{Binding AddProductCommand}"
+                    Command="{Binding AddCouponCommand}"
                     Padding="16,10"
-                    Background="#16A34A"
                     Foreground="White"
                     BorderThickness="0"
                     Margin="0,0,8,0"
                     VerticalAlignment="Bottom"
                     Cursor="Hand">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="6"/>
-                    </Style>
-                </Button.Resources>
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Background" Value="#16A34A"/>
@@ -176,7 +129,7 @@
 
             <Button Grid.Column="2"
                     Content="✏ Szerkesztés"
-                    Command="{Binding EditProductCommand}"
+                    Command="{Binding EditCouponCommand}"
                     Padding="16,10"
                     Foreground="White"
                     BorderThickness="0"
@@ -189,11 +142,8 @@
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="Button">
-                                    <Border Background="{TemplateBinding Background}"
-                                            CornerRadius="6"
-                                            Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter HorizontalAlignment="Center"
-                                                          VerticalAlignment="Center"/>
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                 </ControlTemplate>
                             </Setter.Value>
@@ -214,7 +164,7 @@
 
             <Button Grid.Column="3"
                     Content="🗑 Törlés"
-                    Command="{Binding DeleteProductCommand}"
+                    Command="{Binding DeleteCouponCommand}"
                     Padding="16,10"
                     Foreground="White"
                     BorderThickness="0"
@@ -226,11 +176,8 @@
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="Button">
-                                    <Border Background="{TemplateBinding Background}"
-                                            CornerRadius="6"
-                                            Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter HorizontalAlignment="Center"
-                                                          VerticalAlignment="Center"/>
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
                                 </ControlTemplate>
                             </Setter.Value>
@@ -248,108 +195,10 @@
                     </Style>
                 </Button.Style>
             </Button>
-
         </Grid>
 
-        <!-- Tömeges műveletek sáv. A Row fix magasságú, így a bar megjelenése/eltűnése nem mozgatja a táblázatot. -->
-        <Border Grid.Row="3"
-                Background="#3D2B6B"
-                CornerRadius="8"
-                Padding="16,10"
-                Margin="0,0,0,12"
-                Visibility="{Binding SelectedCount, Converter={StaticResource CountToVisibilityConverter}}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="0"
-                           VerticalAlignment="Center"
-                           Foreground="White"
-                           FontSize="13"
-                           FontWeight="SemiBold">
-                    <Run Text="✔"/>
-                    <Run Text="{Binding SelectedCount, Mode=OneWay}"/>
-                    <Run Text="termék kijelölve"/>
-                </TextBlock>
-
-                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <Button Content="✔ Aktiválás"
-                            Command="{Binding BulkActivateCommand}"
-                            Padding="14,8"
-                            Margin="0,0,8,0"
-                            Foreground="White"
-                            BorderThickness="0"
-                            Cursor="Hand">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background" Value="#16A34A"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#15803D"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                    </Button>
-
-                    <Button Content="✖ Deaktiválás"
-                            Command="{Binding BulkDeactivateCommand}"
-                            Padding="14,8"
-                            Margin="0,0,8,0"
-                            Background="#2A2A3E"
-                            Foreground="White"
-                            BorderThickness="0"
-                            Cursor="Hand">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="6"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
-
-                    <Button Content="🗑 Törlés"
-                            Command="{Binding BulkDeleteCommand}"
-                            Padding="14,8"
-                            Foreground="White"
-                            BorderThickness="0"
-                            Cursor="Hand">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background" Value="#DC2626"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#B91C1C"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </Border>
-
         <!-- Töltés jelző -->
-        <TextBlock Grid.Row="4"
+        <TextBlock Grid.Row="3"
                    Text="Betöltés..."
                    Foreground="#888"
                    FontSize="14"
@@ -358,7 +207,7 @@
                    Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
         <!-- Hibaüzenet -->
-        <TextBlock Grid.Row="4"
+        <TextBlock Grid.Row="3"
                    Text="{Binding ErrorMessage}"
                    Foreground="#FF6B6B"
                    FontSize="14"
@@ -366,10 +215,10 @@
                    VerticalAlignment="Center"
                    Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}"/>
 
-        <!-- Termékek táblázata -->
-        <DataGrid Grid.Row="4"
-                  ItemsSource="{Binding Products}"
-                  SelectedItem="{Binding SelectedProduct}"
+        <!-- Kuponok táblázata -->
+        <DataGrid Grid.Row="3"
+                  ItemsSource="{Binding Coupons}"
+                  SelectedItem="{Binding SelectedCoupon}"
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
                   Background="#2A2A3E"
@@ -380,15 +229,12 @@
                   AlternatingRowBackground="#252535"
                   GridLinesVisibility="Horizontal"
                   HorizontalGridLinesBrush="#333"
-                  SelectionMode="Extended"
-                  SelectionUnit="FullRow"
+                  SelectionMode="Single"
                   CanUserResizeRows="False"
                   CanUserResizeColumns="True"
                   HeadersVisibility="Column"
                   Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibilityConverter}}"
-                  Sorting="DataGrid_Sorting"
-                  SelectionChanged="DataGrid_SelectionChanged"
-                  x:Name="ProductsGrid">
+                  Sorting="DataGrid_Sorting">
 
             <DataGrid.ColumnHeaderStyle>
                 <Style TargetType="DataGridColumnHeader">
@@ -402,7 +248,6 @@
                         <Setter.Value>
                             <ControlTemplate TargetType="DataGridColumnHeader">
                                 <Grid>
-                                    <!-- Bal oldali fogó az átméretezéshez -->
                                     <Thumb x:Name="PART_LeftHeaderGripper" HorizontalAlignment="Left" Width="8" Cursor="SizeWE">
                                         <Thumb.Template><ControlTemplate TargetType="Thumb"><Border Background="Transparent"/></ControlTemplate></Thumb.Template>
                                     </Thumb>
@@ -429,7 +274,6 @@
                                         </Grid>
                                     </Border>
 
-                                    <!-- Jobb oldali fogó az átméretezéshez -->
                                     <Thumb x:Name="PART_RightHeaderGripper" HorizontalAlignment="Right" Width="8" Cursor="SizeWE">
                                         <Thumb.Template><ControlTemplate TargetType="Thumb"><Border Background="Transparent"/></ControlTemplate></Thumb.Template>
                                     </Thumb>
@@ -466,46 +310,31 @@
                 <DataGridTextColumn Header="ID"
                                     Binding="{Binding Id}"
                                     Width="50"/>
-                <DataGridTextColumn Header="Név"
-                                    Binding="{Binding Name}"
+                <DataGridTextColumn Header="Kuponkód"
+                                    Binding="{Binding CouponCode}"
                                     Width="*"/>
-                <DataGridTextColumn Header="Kategória"
-                                    Binding="{Binding Category.Name}"
-                                    Width="140"/>
-                <DataGridTextColumn Header="Ár"
-                                    Binding="{Binding Price, StringFormat={}{0:N0} Ft}"
+                <DataGridTextColumn Header="Típus"
+                                    Binding="{Binding DiscountType}"
+                                    Width="110"/>
+                <DataGridTextColumn Header="Érték"
+                                    Binding="{Binding FormattedValue}"
                                     Width="100"/>
-                <DataGridTemplateColumn Header="Készlet" Width="90"
-                                        SortMemberPath="StockQuantity">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Border Background="{Binding StockQuantity, Converter={StaticResource StockToColorConverter}}"
-                                    CornerRadius="10"
-                                    Padding="10,3"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center">
-                                <TextBlock Text="{Binding StockQuantity}"
-                                           Foreground="White"
-                                           FontWeight="Bold"
-                                           FontSize="12"
-                                           HorizontalAlignment="Center"/>
-                            </Border>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Méret"
-                                    Binding="{Binding VolumeMl}"
-                                    Width="80"/>
-                <DataGridTextColumn Header="Nem"
-                                    Binding="{Binding Gender}"
-                                    Width="80"/>
+                <DataGridTextColumn Header="Lejárat"
+                                    Binding="{Binding ExpiryDate, StringFormat=yyyy.MM.dd}"
+                                    Width="110"/>
+                <DataGridTextColumn Header="Felhasználás"
+                                    Binding="{Binding UsageText}"
+                                    Width="110"/>
+                <DataGridTextColumn Header="Állapot"
+                                    Binding="{Binding StatusText}"
+                                    Width="90"/>
                 <DataGridTemplateColumn Header="Aktív" Width="60">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <CheckBox IsChecked="{Binding IsActive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            <CheckBox IsChecked="{Binding IsActive, Mode=OneWay}"
+                                      IsHitTestVisible="False"
                                       HorizontalAlignment="Center"
-                                      VerticalAlignment="Center"
-                                      Click="IsActive_Click"/>
+                                      VerticalAlignment="Center"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -513,7 +342,7 @@
         </DataGrid>
 
         <!-- Lapozó -->
-        <StackPanel Grid.Row="5"
+        <StackPanel Grid.Row="4"
                     Orientation="Horizontal"
                     HorizontalAlignment="Center"
                     Margin="0,16,0,0">

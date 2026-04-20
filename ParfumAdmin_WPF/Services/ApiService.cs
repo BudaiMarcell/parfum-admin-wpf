@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ParfumAdmin_WPF.Services
 {
@@ -17,7 +18,13 @@ namespace ParfumAdmin_WPF.Services
         public ApiService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            _jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                // A Laravel a decimal mezőket stringként küldi ("price":"89000.00"),
+                // ez engedélyezi, hogy számként olvassuk be.
+                NumberHandling = JsonNumberHandling.AllowReadingFromString
+            };
         }
 
         private async Task<T> GetAsync<T>(string endpoint)
@@ -66,11 +73,17 @@ namespace ParfumAdmin_WPF.Services
         }
 
         // Products
-        public async Task<PaginatedResponse<Product>> GetProductsAsync(int page = 1, string search = null)
+        public async Task<PaginatedResponse<Product>> GetProductsAsync(int page = 1, string search = null, string gender = null, int? categoryId = null, bool lowStock = false)
         {
             var url = $"/products?page={page}";
             if (!string.IsNullOrEmpty(search))
-                url += $"&search={search}";
+                url += $"&search={Uri.EscapeDataString(search)}";
+            if (!string.IsNullOrEmpty(gender))
+                url += $"&gender={gender}";
+            if (categoryId.HasValue && categoryId.Value > 0)
+                url += $"&category_id={categoryId.Value}";
+            if (lowStock)
+                url += "&low_stock=1";
             return await GetAsync<PaginatedResponse<Product>>(url);
         }
 
@@ -86,12 +99,28 @@ namespace ParfumAdmin_WPF.Services
         public async Task DeleteProductAsync(int id) =>
             await DeleteAsync($"/products/{id}");
 
+        public async Task BulkDeleteProductsAsync(IEnumerable<int> ids) =>
+            await PostAsync<object>("/products/bulk-delete", new { ids });
+
+        public async Task BulkUpdateProductsAsync(IEnumerable<int> ids, object data)
+        {
+            // összefésüljük az ids-t és a többi mezőt egy payloadba
+            var json = JsonSerializer.Serialize(data);
+            using var doc = JsonDocument.Parse(json);
+            var dict = new Dictionary<string, object> { ["ids"] = ids };
+            foreach (var p in doc.RootElement.EnumerateObject())
+                dict[p.Name] = JsonSerializer.Deserialize<object>(p.Value.GetRawText());
+            await PostAsync<object>("/products/bulk-update", dict);
+        }
+
         // Orders
-        public async Task<PaginatedResponse<Order>> GetOrdersAsync(int page = 1, string status = null)
+        public async Task<PaginatedResponse<Order>> GetOrdersAsync(int page = 1, string status = null, string search = null)
         {
             var url = $"/orders?page={page}";
             if (!string.IsNullOrEmpty(status))
                 url += $"&status={status}";
+            if (!string.IsNullOrEmpty(search))
+                url += $"&search={Uri.EscapeDataString(search)}";
             return await GetAsync<PaginatedResponse<Order>>(url);
         }
 
@@ -104,7 +133,38 @@ namespace ParfumAdmin_WPF.Services
         public async Task<Order> UpdateOrderPaymentAsync(int id, string paymentStatus) =>
             await PutAsync<Order>($"/orders/{id}/payment", new { payment_status = paymentStatus });
 
+        public async Task DeleteOrderAsync(int id) =>
+            await DeleteAsync($"/orders/{id}");
+
+        // Coupons
+        public async Task<PaginatedResponse<Coupon>> GetCouponsAsync(int page = 1, string search = null, string discountType = null, string status = null)
+        {
+            var url = $"/coupons?page={page}";
+            if (!string.IsNullOrEmpty(search))
+                url += $"&search={Uri.EscapeDataString(search)}";
+            if (!string.IsNullOrEmpty(discountType))
+                url += $"&discount_type={discountType}";
+            if (!string.IsNullOrEmpty(status))
+                url += $"&status={status}";
+            return await GetAsync<PaginatedResponse<Coupon>>(url);
+        }
+
+        public async Task<Coupon> GetCouponAsync(int id) =>
+            await GetAsync<Coupon>($"/coupons/{id}");
+
+        public async Task<Coupon> CreateCouponAsync(object data) =>
+            await PostAsync<Coupon>("/coupons", data);
+
+        public async Task<Coupon> UpdateCouponAsync(int id, object data) =>
+            await PutAsync<Coupon>($"/coupons/{id}", data);
+
+        public async Task DeleteCouponAsync(int id) =>
+            await DeleteAsync($"/coupons/{id}");
+
         // Categories
+        public async Task<List<Category>> GetAdminCategoriesAsync() =>
+            await GetAsync<List<Category>>("/categories");
+
         public async Task<List<Category>> GetCategoriesAsync() =>
             await GetAsync<List<Category>>("/categories");
 

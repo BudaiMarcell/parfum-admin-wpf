@@ -1,4 +1,4 @@
-﻿<Page x:Class="ParfumAdmin_WPF.Views.Pages.OrdersPage"
+<Page x:Class="ParfumAdmin_WPF.Views.Pages.OrdersPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Background="#1E1E2E"
@@ -6,11 +6,11 @@
 
     <Grid Margin="30">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>   <!-- Fejléc -->
+            <RowDefinition Height="Auto"/>   <!-- Szűrők + gombok -->
+            <RowDefinition Height="*"/>      <!-- DataGrid -->
+            <RowDefinition Height="Auto"/>   <!-- Szerkesztés panel -->
+            <RowDefinition Height="Auto"/>   <!-- Lapozó -->
         </Grid.RowDefinitions>
 
         <!-- Fejléc -->
@@ -19,30 +19,108 @@
                        FontSize="24"
                        FontWeight="Bold"
                        Foreground="White"/>
-            <TextBlock Text="Rendelések listázása és státusz kezelése"
+            <TextBlock Text="Rendelések listázása, státusz és fizetés kezelése"
                        FontSize="13"
                        Foreground="#888"
                        Margin="0,4,0,0"/>
         </StackPanel>
 
-        <!-- Szűrő -->
-        <StackPanel Grid.Row="1"
-                    Orientation="Horizontal"
-                    Margin="0,0,0,16">
-            <TextBlock Text="Szűrés státusz szerint:"
-                       Foreground="#AAA"
-                       FontSize="13"
-                       VerticalAlignment="Center"
-                       Margin="0,0,12,0"/>
-            <ComboBox ItemsSource="{Binding StatusOptions}"
-                      SelectedItem="{Binding SelectedStatus}"
-                      FontSize="13"
-                      Padding="12,8"
-                      Width="160"
-                      Background="#2A2A3E"
-                      Foreground="White"
-                      BorderBrush="#444"/>
-        </StackPanel>
+        <!-- Szűrők + gombok -->
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="180"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Státusz szűrő -->
+            <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                <TextBlock Text="Státusz"
+                           Foreground="#AAA"
+                           FontSize="12"
+                           Margin="0,0,0,6"/>
+                <ComboBox ItemsSource="{Binding StatusOptions}"
+                          SelectedItem="{Binding SelectedStatus}"/>
+            </StackPanel>
+
+            <!-- Keresés -->
+            <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                <TextBlock Text="Keresés (vásárló neve vagy email)"
+                           Foreground="#AAA"
+                           FontSize="12"
+                           Margin="0,0,0,6"/>
+                <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                         FontSize="13"
+                         Padding="12,10"
+                         Background="#2A2A3E"
+                         Foreground="White"
+                         BorderBrush="#444"
+                         BorderThickness="1">
+                    <TextBox.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="6"/>
+                        </Style>
+                    </TextBox.Resources>
+                </TextBox>
+            </StackPanel>
+
+            <!-- Szűrők törlése gomb -->
+            <Button Grid.Column="2"
+                    Content="♻ Szűrők törlése"
+                    Command="{Binding ResetFiltersCommand}"
+                    Padding="16,10"
+                    Background="#2A2A3E"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Bottom"
+                    Cursor="Hand">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="6"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+            <!-- Törlés gomb -->
+            <Button Grid.Column="3"
+                    Content="🗑 Törlés"
+                    Command="{Binding DeleteOrderCommand}"
+                    Padding="16,10"
+                    Foreground="White"
+                    BorderThickness="0"
+                    VerticalAlignment="Bottom"
+                    Cursor="Hand">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#DC2626"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}"
+                                            CornerRadius="6"
+                                            Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#B91C1C"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#4A1F1F"/>
+                                <Setter Property="Foreground" Value="#888"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </Grid>
 
         <!-- Töltés jelző -->
         <TextBlock Grid.Row="2"
@@ -78,8 +156,10 @@
                   HorizontalGridLinesBrush="#333"
                   SelectionMode="Single"
                   CanUserResizeRows="False"
+                  CanUserResizeColumns="True"
                   HeadersVisibility="Column"
-                  Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                  Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+                  Sorting="DataGrid_Sorting">
 
             <DataGrid.ColumnHeaderStyle>
                 <Style TargetType="DataGridColumnHeader">
@@ -89,6 +169,51 @@
                     <Setter Property="FontWeight" Value="SemiBold"/>
                     <Setter Property="BorderBrush" Value="#333"/>
                     <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="DataGridColumnHeader">
+                                <Grid>
+                                    <Thumb x:Name="PART_LeftHeaderGripper" HorizontalAlignment="Left" Width="8" Cursor="SizeWE">
+                                        <Thumb.Template><ControlTemplate TargetType="Thumb"><Border Background="Transparent"/></ControlTemplate></Thumb.Template>
+                                    </Thumb>
+
+                                    <Border Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            Padding="{TemplateBinding Padding}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ContentPresenter Grid.Column="0"
+                                                              VerticalAlignment="Center"
+                                                              HorizontalAlignment="Left"/>
+                                            <TextBlock x:Name="SortArrow"
+                                                       Grid.Column="1"
+                                                       Margin="6,0,0,0"
+                                                       FontSize="11"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="#7C3AED"
+                                                       Text=""/>
+                                        </Grid>
+                                    </Border>
+
+                                    <Thumb x:Name="PART_RightHeaderGripper" HorizontalAlignment="Right" Width="8" Cursor="SizeWE">
+                                        <Thumb.Template><ControlTemplate TargetType="Thumb"><Border Background="Transparent"/></ControlTemplate></Thumb.Template>
+                                    </Thumb>
+                                </Grid>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="SortDirection" Value="Ascending">
+                                        <Setter TargetName="SortArrow" Property="Text" Value="▲"/>
+                                    </Trigger>
+                                    <Trigger Property="SortDirection" Value="Descending">
+                                        <Setter TargetName="SortArrow" Property="Text" Value="▼"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
                 </Style>
             </DataGrid.ColumnHeaderStyle>
 
@@ -113,6 +238,9 @@
                 <DataGridTextColumn Header="Vásárló"
                                     Binding="{Binding User.Name}"
                                     Width="*"/>
+                <DataGridTextColumn Header="Email"
+                                    Binding="{Binding User.Email}"
+                                    Width="180"/>
                 <DataGridTextColumn Header="Összeg"
                                     Binding="{Binding TotalAmount, StringFormat={}{0:N0} Ft}"
                                     Width="110"/>
@@ -127,49 +255,98 @@
                                     Width="70"/>
                 <DataGridTextColumn Header="Dátum"
                                     Binding="{Binding CreatedAt}"
-                                    Width="130"/>
+                                    Width="150"/>
             </DataGrid.Columns>
         </DataGrid>
 
-        <!-- Státusz módosítás -->
+        <!-- Szerkesztés panel — csak ha ki van választva egy sor -->
         <Border Grid.Row="3"
-                Background="#2A2A3E"
+                Background="#1A1A2E"
                 CornerRadius="8"
+                BorderBrush="#333"
+                BorderThickness="1"
                 Padding="16"
-                Margin="0,16,0,0"
+                Margin="0,12,0,0"
                 Visibility="{Binding SelectedOrder, Converter={StaticResource NullToVisibilityConverter}}">
-            <StackPanel>
-                <TextBlock Text="Kiválasztott rendelés státuszának módosítása"
-                           Foreground="#AAA"
-                           FontSize="12"
-                           Margin="0,0,0,12"/>
-                <StackPanel Orientation="Horizontal">
-                    <Button Content="pending"
-                            Command="{Binding UpdateStatusCommand}"
-                            CommandParameter="pending"
-                            Style="{StaticResource StatusButtonStyle}"/>
-                    <Button Content="processing"
-                            Command="{Binding UpdateStatusCommand}"
-                            CommandParameter="processing"
-                            Style="{StaticResource StatusButtonStyle}"/>
-                    <Button Content="shipped"
-                            Command="{Binding UpdateStatusCommand}"
-                            CommandParameter="shipped"
-                            Style="{StaticResource StatusButtonStyle}"/>
-                    <Button Content="arrived"
-                            Command="{Binding UpdateStatusCommand}"
-                            CommandParameter="arrived"
-                            Style="{StaticResource StatusButtonStyle}"/>
-                    <Button Content="canceled"
-                            Command="{Binding UpdateStatusCommand}"
-                            CommandParameter="canceled"
-                            Style="{StaticResource StatusButtonStyle}"/>
-                    <Button Content="refunded"
-                            Command="{Binding UpdateStatusCommand}"
-                            CommandParameter="refunded"
-                            Style="{StaticResource StatusButtonStyle}"/>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Fejléc -->
+                <TextBlock Grid.Row="0"
+                           Text="Kiválasztott rendelés módosítása"
+                           Foreground="White"
+                           FontWeight="SemiBold"
+                           FontSize="13"
+                           Margin="0,0,0,10"/>
+
+                <!-- Rendelés státusz -->
+                <StackPanel Grid.Row="1" Margin="0,0,0,10">
+                    <TextBlock Text="Rendelés státusza"
+                               Foreground="#AAA"
+                               FontSize="11"
+                               Margin="0,0,0,6"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="pending"
+                                Command="{Binding UpdateStatusCommand}"
+                                CommandParameter="pending"
+                                Style="{StaticResource StatusButtonStyle}"/>
+                        <Button Content="processing"
+                                Command="{Binding UpdateStatusCommand}"
+                                CommandParameter="processing"
+                                Style="{StaticResource StatusButtonStyle}"/>
+                        <Button Content="shipped"
+                                Command="{Binding UpdateStatusCommand}"
+                                CommandParameter="shipped"
+                                Style="{StaticResource StatusButtonStyle}"/>
+                        <Button Content="arrived"
+                                Command="{Binding UpdateStatusCommand}"
+                                CommandParameter="arrived"
+                                Style="{StaticResource StatusButtonStyle}"/>
+                        <Button Content="canceled"
+                                Command="{Binding UpdateStatusCommand}"
+                                CommandParameter="canceled"
+                                Style="{StaticResource StatusButtonStyle}"/>
+                        <Button Content="refunded"
+                                Command="{Binding UpdateStatusCommand}"
+                                CommandParameter="refunded"
+                                Style="{StaticResource StatusButtonStyle}"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
+
+                <!-- Fizetési státusz -->
+                <StackPanel Grid.Row="2">
+                    <TextBlock Text="Fizetési státusz"
+                               Foreground="#AAA"
+                               FontSize="11"
+                               Margin="0,0,0,6"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="pending"
+                                Command="{Binding UpdatePaymentCommand}"
+                                CommandParameter="pending"
+                                Style="{StaticResource StatusButtonStyle}"/>
+                        <Button Content="processing"
+                                Command="{Binding UpdatePaymentCommand}"
+                                CommandParameter="processing"
+                                Style="{StaticResource StatusButtonStyle}"/>
+                        <Button Content="paid"
+                                Command="{Binding UpdatePaymentCommand}"
+                                CommandParameter="paid"
+                                Style="{StaticResource StatusButtonStyle}"/>
+                        <Button Content="failed"
+                                Command="{Binding UpdatePaymentCommand}"
+                                CommandParameter="failed"
+                                Style="{StaticResource StatusButtonStyle}"/>
+                        <Button Content="refunded"
+                                Command="{Binding UpdatePaymentCommand}"
+                                CommandParameter="refunded"
+                                Style="{StaticResource StatusButtonStyle}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <!-- Lapozó -->

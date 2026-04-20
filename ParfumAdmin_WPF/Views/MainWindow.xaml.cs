@@ -40,11 +40,22 @@ namespace ParfumAdmin_WPF.Views
                 case "Orders":
                     MainFrame.Navigate(App.ServiceProvider.GetRequiredService<OrdersPage>());
                     break;
+                case "Coupons":
+                    MainFrame.Navigate(App.ServiceProvider.GetRequiredService<CouponsPage>());
+                    break;
             }
         }
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
+            var dialog = new ConfirmDialog("Kijelentkezés", "Biztos ki szeretnél jelentkezni?")
+            {
+                Owner = this
+            };
+
+            if (dialog.ShowDialog() != true)
+                return;
+
             _authService.Logout();
 
             var loginWindow = App.ServiceProvider.GetRequiredService<LoginWindow>();

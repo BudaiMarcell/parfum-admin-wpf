@@ -19,12 +19,6 @@ namespace ParfumAdmin_WPF.ViewModels
             set => SetProperty(ref _email, value);
         }
 
-        private string _errorMessage;
-        public new string ErrorMessage
-        {
-            get => _errorMessage;
-            set => SetProperty(ref _errorMessage, value);
-        }
 
         public ICommand LoginCommand { get; }
 
@@ -54,6 +48,7 @@ namespace ParfumAdmin_WPF.ViewModels
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine("HIBA: " + ex.Message);
                 ErrorMessage = ex.Message;
             }
             finally

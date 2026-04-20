@@ -15,6 +15,11 @@ namespace ParfumAdmin_WPF.Views
             DataContext = _viewModel;
 
             _viewModel.OnLoginSuccess += OpenMainWindow;
+
+            PasswordBox.PasswordChanged += (s, e) =>
+            {
+                _viewModel.Password = PasswordBox.Password;
+            };
         }
 
         private void OpenMainWindow()
