@@ -10,7 +10,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <!-- Tömeges műveletek sor fix magassága, hogy ne mozgassa a táblázatot -->
-            <RowDefinition Height="62"/>
+            <RowDefinition Height="72"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -274,11 +274,12 @@
                     <Run Text="termék kijelölve"/>
                 </TextBlock>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Content="✔ Aktiválás"
                             Command="{Binding BulkActivateCommand}"
-                            Padding="14,8"
+                            Padding="14,10"
                             Margin="0,0,8,0"
+                            FontSize="13"
                             Foreground="White"
                             BorderThickness="0"
                             Cursor="Hand">
@@ -305,8 +306,9 @@
 
                     <Button Content="✖ Deaktiválás"
                             Command="{Binding BulkDeactivateCommand}"
-                            Padding="14,8"
+                            Padding="14,10"
                             Margin="0,0,8,0"
+                            FontSize="13"
                             Background="#2A2A3E"
                             Foreground="White"
                             BorderThickness="0"
@@ -320,7 +322,8 @@
 
                     <Button Content="🗑 Törlés"
                             Command="{Binding BulkDeleteCommand}"
-                            Padding="14,8"
+                            Padding="14,10"
+                            FontSize="13"
                             Foreground="White"
                             BorderThickness="0"
                             Cursor="Hand">

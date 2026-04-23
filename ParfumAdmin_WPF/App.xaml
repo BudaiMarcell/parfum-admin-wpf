@@ -8,6 +8,8 @@
         <helpers:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
         <helpers:StockToColorConverter x:Key="StockToColorConverter"/>
         <helpers:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+        <helpers:StatusMatchToBrushConverter x:Key="StatusMatchToBrushConverter"/>
+        <helpers:ActionToColorConverter x:Key="ActionToColorConverter"/>
 
         <!-- Navigációs gomb stílus -->
         <Style x:Key="NavButtonStyle" TargetType="Button">

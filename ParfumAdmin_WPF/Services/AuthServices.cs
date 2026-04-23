@@ -12,7 +12,9 @@ namespace ParfumAdmin_WPF.Services
     {
         private readonly HttpClient _httpClient;
         private string _token;
-        private const string BaseUrl = "http://localhost:8000/api";
+        // 127.0.0.1 instead of "localhost" — on Windows "localhost" resolves to ::1 (IPv6) first
+        // and falls back to 127.0.0.1 after a ~2s timeout if PHP's dev server only listens on IPv4.
+        private const string BaseUrl = "http://127.0.0.1:8000/api";
 
         public AuthService(HttpClient httpClient)
         {

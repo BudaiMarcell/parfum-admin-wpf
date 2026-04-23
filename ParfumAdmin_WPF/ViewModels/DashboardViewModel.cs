@@ -71,9 +71,13 @@ namespace ParfumAdmin_WPF.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
-                await LoadOverviewAsync();
-                await LoadRealtimeAsync();
-                await LoadTopProductsAsync();
+                // Három független végpont — párhuzamosan hívjuk őket, hogy a teljes
+                // betöltés a leglassabb kérés idejébe kerüljön, ne az összeg időbe.
+                await Task.WhenAll(
+                    LoadOverviewAsync(),
+                    LoadRealtimeAsync(),
+                    LoadTopProductsAsync()
+                );
             }
             catch (Exception ex)
             {
@@ -113,11 +117,35 @@ namespace ParfumAdmin_WPF.ViewModels
             ActiveSessions = doc.RootElement.GetProperty("active_sessions").GetInt32();
         }
 
+        /// <summary>
+        /// Lightweight refresh for the "aktív most" counter only.
+        /// Called on a 30s timer from the page so the live count stays fresh
+        /// without reloading the full overview + top products.
+        /// </summary>
+        public async Task RefreshActiveSessionsAsync()
+        {
+            try
+            {
+                await LoadRealtimeAsync();
+            }
+            catch
+            {
+                // Silent — a dropped heartbeat shouldn't show an error banner.
+            }
+        }
+
         private async Task LoadTopProductsAsync()
         {
             var result = await _apiService.GetAnalyticsTopProductsAsync();
             var json = JsonSerializer.Serialize(result);
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            // Laravel a decimal oszlopokat ("price", "subtotal") stringként küldi a
+            // `decimal:2` cast miatt — ezért kell az AllowReadingFromString, különben
+            // a TotalRevenue / Product.Price deszerializálás eldobna.
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
+            };
             var items = JsonSerializer.Deserialize<List<TopProduct>>(json, options);
 
             TopProducts.Clear();

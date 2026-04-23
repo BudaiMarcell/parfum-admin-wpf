@@ -21,10 +21,26 @@ namespace ParfumAdmin_WPF
             var services = new ServiceCollection();
 
             // HttpClient regisztrálása
+            // - AutomaticDecompression: gzip/deflate csökkenti a hálózati átvitelt (Laravel küld gzip-et, ha a kliens Accept-Encoding-al jelzi).
+            // - Timeout: 15s, hogy egy leállt szerver ne fagyassza be az UI-t korlátlan ideig.
+            // - ConnectionClose=false + PooledConnectionLifetime: tartja a TCP kapcsolatot, így csak az első kérés lassú.
             services.AddSingleton<HttpClient>(provider =>
             {
-                var client = new HttpClient();
+                var handler = new SocketsHttpHandler
+                {
+                    AutomaticDecompression = System.Net.DecompressionMethods.GZip
+                                           | System.Net.DecompressionMethods.Deflate,
+                    PooledConnectionLifetime = TimeSpan.FromMinutes(10),
+                    PooledConnectionIdleTimeout = TimeSpan.FromMinutes(2),
+                    ConnectTimeout = TimeSpan.FromSeconds(5),
+                };
+
+                var client = new HttpClient(handler)
+                {
+                    Timeout = TimeSpan.FromSeconds(15),
+                };
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate");
                 return client;
             });
 
@@ -40,6 +56,8 @@ namespace ParfumAdmin_WPF
             services.AddTransient<ProductFormViewModel>();
             services.AddTransient<CouponsViewModel>();
             services.AddTransient<CouponFormViewModel>();
+            services.AddTransient<AuditLogsViewModel>();
+            services.AddTransient<AnalyticsViewModel>();
 
             // Views regisztrálása
             services.AddTransient<LoginWindow>();
@@ -52,6 +70,8 @@ namespace ParfumAdmin_WPF
             services.AddTransient<ProductsPage>();
             services.AddTransient<OrdersPage>();
             services.AddTransient<CouponsPage>();
+            services.AddTransient<AuditLogsPage>();
+            services.AddTransient<AnalyticsPage>();
 
             ServiceProvider = services.BuildServiceProvider();
 

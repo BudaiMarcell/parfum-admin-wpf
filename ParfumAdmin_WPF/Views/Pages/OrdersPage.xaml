@@ -237,10 +237,11 @@
                                     Width="50"/>
                 <DataGridTextColumn Header="Vásárló"
                                     Binding="{Binding User.Name}"
-                                    Width="*"/>
+                                    Width="*"
+                                    MinWidth="180"/>
                 <DataGridTextColumn Header="Email"
                                     Binding="{Binding User.Email}"
-                                    Width="180"/>
+                                    Width="190"/>
                 <DataGridTextColumn Header="Összeg"
                                     Binding="{Binding TotalAmount, StringFormat={}{0:N0} Ft}"
                                     Width="110"/>
@@ -293,26 +294,32 @@
                         <Button Content="pending"
                                 Command="{Binding UpdateStatusCommand}"
                                 CommandParameter="pending"
+                                Background="{Binding SelectedOrder.Status, Converter={StaticResource StatusMatchToBrushConverter}, ConverterParameter=pending}"
                                 Style="{StaticResource StatusButtonStyle}"/>
                         <Button Content="processing"
                                 Command="{Binding UpdateStatusCommand}"
                                 CommandParameter="processing"
+                                Background="{Binding SelectedOrder.Status, Converter={StaticResource StatusMatchToBrushConverter}, ConverterParameter=processing}"
                                 Style="{StaticResource StatusButtonStyle}"/>
                         <Button Content="shipped"
                                 Command="{Binding UpdateStatusCommand}"
                                 CommandParameter="shipped"
+                                Background="{Binding SelectedOrder.Status, Converter={StaticResource StatusMatchToBrushConverter}, ConverterParameter=shipped}"
                                 Style="{StaticResource StatusButtonStyle}"/>
                         <Button Content="arrived"
                                 Command="{Binding UpdateStatusCommand}"
                                 CommandParameter="arrived"
+                                Background="{Binding SelectedOrder.Status, Converter={StaticResource StatusMatchToBrushConverter}, ConverterParameter=arrived}"
                                 Style="{StaticResource StatusButtonStyle}"/>
                         <Button Content="canceled"
                                 Command="{Binding UpdateStatusCommand}"
                                 CommandParameter="canceled"
+                                Background="{Binding SelectedOrder.Status, Converter={StaticResource StatusMatchToBrushConverter}, ConverterParameter=canceled}"
                                 Style="{StaticResource StatusButtonStyle}"/>
                         <Button Content="refunded"
                                 Command="{Binding UpdateStatusCommand}"
                                 CommandParameter="refunded"
+                                Background="{Binding SelectedOrder.Status, Converter={StaticResource StatusMatchToBrushConverter}, ConverterParameter=refunded}"
                                 Style="{StaticResource StatusButtonStyle}"/>
                     </StackPanel>
                 </StackPanel>
@@ -327,22 +334,27 @@
                         <Button Content="pending"
                                 Command="{Binding UpdatePaymentCommand}"
                                 CommandParameter="pending"
+                                Background="{Binding SelectedOrder.PaymentStatus, Converter={StaticResource StatusMatchToBrushConverter}, ConverterParameter=pending}"
                                 Style="{StaticResource StatusButtonStyle}"/>
                         <Button Content="processing"
                                 Command="{Binding UpdatePaymentCommand}"
                                 CommandParameter="processing"
+                                Background="{Binding SelectedOrder.PaymentStatus, Converter={StaticResource StatusMatchToBrushConverter}, ConverterParameter=processing}"
                                 Style="{StaticResource StatusButtonStyle}"/>
                         <Button Content="paid"
                                 Command="{Binding UpdatePaymentCommand}"
                                 CommandParameter="paid"
+                                Background="{Binding SelectedOrder.PaymentStatus, Converter={StaticResource StatusMatchToBrushConverter}, ConverterParameter=paid}"
                                 Style="{StaticResource StatusButtonStyle}"/>
                         <Button Content="failed"
                                 Command="{Binding UpdatePaymentCommand}"
                                 CommandParameter="failed"
+                                Background="{Binding SelectedOrder.PaymentStatus, Converter={StaticResource StatusMatchToBrushConverter}, ConverterParameter=failed}"
                                 Style="{StaticResource StatusButtonStyle}"/>
                         <Button Content="refunded"
                                 Command="{Binding UpdatePaymentCommand}"
                                 CommandParameter="refunded"
+                                Background="{Binding SelectedOrder.PaymentStatus, Converter={StaticResource StatusMatchToBrushConverter}, ConverterParameter=refunded}"
                                 Style="{StaticResource StatusButtonStyle}"/>
                     </StackPanel>
                 </StackPanel>

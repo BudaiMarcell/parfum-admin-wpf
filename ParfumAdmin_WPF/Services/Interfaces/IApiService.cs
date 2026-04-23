@@ -33,10 +33,20 @@ namespace ParfumAdmin_WPF.Services.Interfaces
         Task<Coupon> UpdateCouponAsync(int id, object data);
         Task DeleteCouponAsync(int id);
 
-        // Analytics
+        // Audit logs
+        Task<PaginatedResponse<AuditLog>> GetAuditLogsAsync(int page = 1, string action = null, string modelType = null, string search = null);
+
+        // Analytics (raw — used by existing DashboardViewModel)
         Task<object> GetAnalyticsOverviewAsync();
         Task<object> GetAnalyticsHourlyAsync();
         Task<object> GetAnalyticsTopProductsAsync();
         Task<object> GetAnalyticsRealtimeAsync();
+
+        // Analytics (typed — used by AnalyticsPage)
+        Task<AnalyticsOverview> GetAnalyticsOverviewTypedAsync();
+        Task<HourlySeries>      GetAnalyticsHourlyTypedAsync();
+        Task<DailySeries>       GetAnalyticsDailyAsync(int days = 30);
+        Task<DeviceStats>       GetAnalyticsDevicesAsync();
+        Task<FunnelStats>       GetAnalyticsFunnelAsync();
     }
 }

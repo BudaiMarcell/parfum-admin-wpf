@@ -43,8 +43,17 @@ namespace ParfumAdmin_WPF.Views
                 case "Coupons":
                     MainFrame.Navigate(App.ServiceProvider.GetRequiredService<CouponsPage>());
                     break;
+                case "AuditLogs":
+                    MainFrame.Navigate(App.ServiceProvider.GetRequiredService<AuditLogsPage>());
+                    break;
+                case "Analytics":
+                    MainFrame.Navigate(App.ServiceProvider.GetRequiredService<AnalyticsPage>());
+                    break;
             }
         }
+
+        /// <summary>Called by DashboardPage when a stat box is clicked.</summary>
+        public void NavigateToPage(string page) => NavigateTo(page);
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {

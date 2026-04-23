@@ -13,7 +13,9 @@ namespace ParfumAdmin_WPF.Services
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
-        private const string BaseUrl = "http://localhost:8000/api/admin";
+        // 127.0.0.1 instead of "localhost" — on Windows "localhost" resolves to ::1 (IPv6) first
+        // and falls back to 127.0.0.1 after a ~2s timeout if PHP's dev server only listens on IPv4.
+        private const string BaseUrl = "http://127.0.0.1:8000/api/admin";
 
         public ApiService(HttpClient httpClient)
         {
@@ -168,7 +170,17 @@ namespace ParfumAdmin_WPF.Services
         public async Task<List<Category>> GetCategoriesAsync() =>
             await GetAsync<List<Category>>("/categories");
 
-        // Analytics
+        // Audit logs
+        public async Task<PaginatedResponse<AuditLog>> GetAuditLogsAsync(int page = 1, string action = null, string modelType = null, string search = null)
+        {
+            var url = $"/audit-logs?page={page}";
+            if (!string.IsNullOrEmpty(action))    url += $"&action={action}";
+            if (!string.IsNullOrEmpty(modelType)) url += $"&model_type={modelType}";
+            if (!string.IsNullOrEmpty(search))    url += $"&search={Uri.EscapeDataString(search)}";
+            return await GetAsync<PaginatedResponse<AuditLog>>(url);
+        }
+
+        // Analytics (raw)
         public async Task<object> GetAnalyticsOverviewAsync() =>
             await GetAsync<object>("/analytics/overview");
 
@@ -180,5 +192,21 @@ namespace ParfumAdmin_WPF.Services
 
         public async Task<object> GetAnalyticsRealtimeAsync() =>
             await GetAsync<object>("/analytics/realtime");
+
+        // Analytics (typed)
+        public async Task<AnalyticsOverview> GetAnalyticsOverviewTypedAsync() =>
+            await GetAsync<AnalyticsOverview>("/analytics/overview");
+
+        public async Task<HourlySeries> GetAnalyticsHourlyTypedAsync() =>
+            await GetAsync<HourlySeries>("/analytics/hourly");
+
+        public async Task<DailySeries> GetAnalyticsDailyAsync(int days = 30) =>
+            await GetAsync<DailySeries>($"/analytics/daily?days={days}");
+
+        public async Task<DeviceStats> GetAnalyticsDevicesAsync() =>
+            await GetAsync<DeviceStats>("/analytics/devices");
+
+        public async Task<FunnelStats> GetAnalyticsFunnelAsync() =>
+            await GetAsync<FunnelStats>("/analytics/funnel");
     }
 }

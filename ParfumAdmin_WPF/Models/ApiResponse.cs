@@ -43,8 +43,18 @@ namespace ParfumAdmin_WPF.Models
 
     public class TopProduct
     {
+        [JsonPropertyName("product_id")]
         public int ProductId { get; set; }
-        public int ViewCount { get; set; }
+
+        // Összesen eladott darabszám (SUM(order_items.quantity))
+        [JsonPropertyName("total_qty")]
+        public int SoldQty { get; set; }
+
+        // Összesen hozott bevétel (SUM(order_items.subtotal))
+        [JsonPropertyName("total_revenue")]
+        public decimal TotalRevenue { get; set; }
+
+        [JsonPropertyName("product")]
         public Product Product { get; set; }
     }
 }

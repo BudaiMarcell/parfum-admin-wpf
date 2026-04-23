@@ -4,6 +4,37 @@
       Background="#1E1E2E"
       Loaded="Page_Loaded">
 
+    <Page.Resources>
+        <!-- A stat-box gombok megjelenésüket a belső Border adja; a Button csak a kattintást és hover-emelést intézi. -->
+        <Style x:Key="StatCardButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <ContentPresenter/>
+                            <Border x:Name="HoverHint"
+                                    BorderBrush="#7C3AED"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Opacity="0"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HoverHint" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="30">
             <Grid.RowDefinitions>
@@ -14,16 +45,27 @@
             </Grid.RowDefinitions>
 
             <!-- Fejléc -->
-            <StackPanel Grid.Row="0" Margin="0,0,0,24">
-                <TextBlock Text="Dashboard"
-                           FontSize="24"
-                           FontWeight="Bold"
-                           Foreground="White"/>
-                <TextBlock Text="Áttekintés és analitikai adatok"
-                           FontSize="13"
-                           Foreground="#888"
-                           Margin="0,4,0,0"/>
-            </StackPanel>
+            <Grid Grid.Row="0" Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Dashboard"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="White"/>
+                    <TextBlock Text="Áttekintés és analitikai adatok"
+                               FontSize="13"
+                               Foreground="#888"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Content="↻ Frissítés"
+                        Command="{Binding RefreshCommand}"
+                        Padding="14,8"
+                        VerticalAlignment="Center"/>
+            </Grid>
 
             <!-- Töltés jelző -->
             <TextBlock Grid.Row="1"
@@ -41,58 +83,64 @@
                          Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibilityConverter}}">
 
                 <!-- Mai látogatók -->
-                <Border Background="#2A2A3E" CornerRadius="10" Margin="0,0,12,0" Padding="20">
-                    <StackPanel>
-                        <TextBlock Text="👁 Mai látogatók"
-                                   Foreground="#888"
-                                   FontSize="12"
-                                   Margin="0,0,0,8"/>
-                        <TextBlock Text="{Binding TodayPageviews}"
-                                   Foreground="White"
-                                   FontSize="32"
-                                   FontWeight="Bold"/>
-                        <TextBlock Text="oldalmegtekintés ma"
-                                   Foreground="#666"
-                                   FontSize="11"
-                                   Margin="0,4,0,0"/>
-                    </StackPanel>
-                </Border>
+                <Button Style="{StaticResource StatCardButton}" Click="StatBox_Click" Margin="0,0,12,0">
+                    <Border Background="#2A2A3E" CornerRadius="10" Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="👁 Mai látogatók"
+                                       Foreground="#888"
+                                       FontSize="12"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding TodayPageviews}"
+                                       Foreground="White"
+                                       FontSize="32"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="oldalmegtekintés ma"
+                                       Foreground="#666"
+                                       FontSize="11"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Button>
 
                 <!-- Mai sessionök -->
-                <Border Background="#2A2A3E" CornerRadius="10" Margin="6,0,6,0" Padding="20">
-                    <StackPanel>
-                        <TextBlock Text="👤 Mai sessionök"
-                                   Foreground="#888"
-                                   FontSize="12"
-                                   Margin="0,0,0,8"/>
-                        <TextBlock Text="{Binding TodaySessions}"
-                                   Foreground="White"
-                                   FontSize="32"
-                                   FontWeight="Bold"/>
-                        <TextBlock Text="egyedi látogató ma"
-                                   Foreground="#666"
-                                   FontSize="11"
-                                   Margin="0,4,0,0"/>
-                    </StackPanel>
-                </Border>
+                <Button Style="{StaticResource StatCardButton}" Click="StatBox_Click" Margin="6,0,6,0">
+                    <Border Background="#2A2A3E" CornerRadius="10" Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="👤 Mai sessionök"
+                                       Foreground="#888"
+                                       FontSize="12"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding TodaySessions}"
+                                       Foreground="White"
+                                       FontSize="32"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="egyedi látogató ma"
+                                       Foreground="#666"
+                                       FontSize="11"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Button>
 
                 <!-- Aktív felhasználók -->
-                <Border Background="#3D2B6B" CornerRadius="10" Margin="12,0,0,0" Padding="20">
-                    <StackPanel>
-                        <TextBlock Text="⚡ Aktív most"
-                                   Foreground="#C4B5FD"
-                                   FontSize="12"
-                                   Margin="0,0,0,8"/>
-                        <TextBlock Text="{Binding ActiveSessions}"
-                                   Foreground="White"
-                                   FontSize="32"
-                                   FontWeight="Bold"/>
-                        <TextBlock Text="aktív az elmúlt 5 percben"
-                                   Foreground="#9D8FBF"
-                                   FontSize="11"
-                                   Margin="0,4,0,0"/>
-                    </StackPanel>
-                </Border>
+                <Button Style="{StaticResource StatCardButton}" Click="StatBox_Click" Margin="12,0,0,0">
+                    <Border Background="#3D2B6B" CornerRadius="10" Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="⚡ Aktív most"
+                                       Foreground="#C4B5FD"
+                                       FontSize="12"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding ActiveSessions}"
+                                       Foreground="White"
+                                       FontSize="32"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="aktív az elmúlt 5 percben"
+                                       Foreground="#9D8FBF"
+                                       FontSize="11"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Button>
 
             </UniformGrid>
 
@@ -103,58 +151,64 @@
                          Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibilityConverter}}">
 
                 <!-- Heti látogatók -->
-                <Border Background="#2A2A3E" CornerRadius="10" Margin="0,0,12,0" Padding="20">
-                    <StackPanel>
-                        <TextBlock Text="📅 Heti látogatók"
-                                   Foreground="#888"
-                                   FontSize="12"
-                                   Margin="0,0,0,8"/>
-                        <TextBlock Text="{Binding WeekPageviews}"
-                                   Foreground="White"
-                                   FontSize="32"
-                                   FontWeight="Bold"/>
-                        <TextBlock Text="elmúlt 7 nap"
-                                   Foreground="#666"
-                                   FontSize="11"
-                                   Margin="0,4,0,0"/>
-                    </StackPanel>
-                </Border>
+                <Button Style="{StaticResource StatCardButton}" Click="StatBox_Click" Margin="0,0,12,0">
+                    <Border Background="#2A2A3E" CornerRadius="10" Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="📅 Heti látogatók"
+                                       Foreground="#888"
+                                       FontSize="12"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding WeekPageviews}"
+                                       Foreground="White"
+                                       FontSize="32"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="elmúlt 7 nap"
+                                       Foreground="#666"
+                                       FontSize="11"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Button>
 
                 <!-- Heti új látogatók -->
-                <Border Background="#2A2A3E" CornerRadius="10" Margin="6,0,6,0" Padding="20">
-                    <StackPanel>
-                        <TextBlock Text="🆕 Új látogatók"
-                                   Foreground="#888"
-                                   FontSize="12"
-                                   Margin="0,0,0,8"/>
-                        <TextBlock Text="{Binding WeekNewVisitors}"
-                                   Foreground="White"
-                                   FontSize="32"
-                                   FontWeight="Bold"/>
-                        <TextBlock Text="elmúlt 7 nap"
-                                   Foreground="#666"
-                                   FontSize="11"
-                                   Margin="0,4,0,0"/>
-                    </StackPanel>
-                </Border>
+                <Button Style="{StaticResource StatCardButton}" Click="StatBox_Click" Margin="6,0,6,0">
+                    <Border Background="#2A2A3E" CornerRadius="10" Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="🆕 Új látogatók"
+                                       Foreground="#888"
+                                       FontSize="12"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding WeekNewVisitors}"
+                                       Foreground="White"
+                                       FontSize="32"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="elmúlt 7 nap"
+                                       Foreground="#666"
+                                       FontSize="11"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Button>
 
                 <!-- Havi látogatók -->
-                <Border Background="#2A2A3E" CornerRadius="10" Margin="12,0,0,0" Padding="20">
-                    <StackPanel>
-                        <TextBlock Text="📊 Havi látogatók"
-                                   Foreground="#888"
-                                   FontSize="12"
-                                   Margin="0,0,0,8"/>
-                        <TextBlock Text="{Binding MonthPageviews}"
-                                   Foreground="White"
-                                   FontSize="32"
-                                   FontWeight="Bold"/>
-                        <TextBlock Text="elmúlt 30 nap"
-                                   Foreground="#666"
-                                   FontSize="11"
-                                   Margin="0,4,0,0"/>
-                    </StackPanel>
-                </Border>
+                <Button Style="{StaticResource StatCardButton}" Click="StatBox_Click" Margin="12,0,0,0">
+                    <Border Background="#2A2A3E" CornerRadius="10" Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="📊 Havi látogatók"
+                                       Foreground="#888"
+                                       FontSize="12"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding MonthPageviews}"
+                                       Foreground="White"
+                                       FontSize="32"
+                                       FontWeight="Bold"/>
+                            <TextBlock Text="elmúlt 30 nap"
+                                       Foreground="#666"
+                                       FontSize="11"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Button>
 
             </UniformGrid>
 
@@ -165,7 +219,7 @@
                     Padding="20"
                     Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                 <StackPanel>
-                    <TextBlock Text="🏆 Top 10 legtöbbet megtekintett termék (elmúlt 30 nap)"
+                    <TextBlock Text="🏆 Top 10 legtöbbet eladott termék (elmúlt 30 nap)"
                                Foreground="White"
                                FontSize="14"
                                FontWeight="SemiBold"
@@ -211,9 +265,12 @@
                             <DataGridTextColumn Header="Ár"
                                                 Binding="{Binding Product.Price, StringFormat={}{0:N0} Ft}"
                                                 Width="100"/>
-                            <DataGridTextColumn Header="Megtekintések"
-                                                Binding="{Binding ViewCount}"
-                                                Width="120"/>
+                            <DataGridTextColumn Header="Eladva"
+                                                Binding="{Binding SoldQty, StringFormat={}{0:N0} db}"
+                                                Width="100"/>
+                            <DataGridTextColumn Header="Bevétel"
+                                                Binding="{Binding TotalRevenue, StringFormat={}{0:N0} Ft}"
+                                                Width="140"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </StackPanel>

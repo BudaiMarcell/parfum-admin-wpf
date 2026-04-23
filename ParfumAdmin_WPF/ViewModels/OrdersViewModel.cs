@@ -183,38 +183,33 @@ namespace ParfumAdmin_WPF.ViewModels
         private async Task UpdateStatusAsync(string newStatus)
         {
             if (SelectedOrder == null || string.IsNullOrEmpty(newStatus)) return;
+            var previous = SelectedOrder.Status;
             try
             {
-                IsLoading = true;
+                // Azonnali UI frissítés (gombok és táblázat), majd szerver felé
+                SelectedOrder.Status = newStatus;
                 await _apiService.UpdateOrderStatusAsync(SelectedOrder.Id, newStatus);
-                await LoadOrdersAsync();
             }
             catch (Exception ex)
             {
+                SelectedOrder.Status = previous; // rollback
                 ErrorMessage = "Státusz módosítás sikertelen: " + ex.Message;
-            }
-            finally
-            {
-                IsLoading = false;
             }
         }
 
         private async Task UpdatePaymentAsync(string newPaymentStatus)
         {
             if (SelectedOrder == null || string.IsNullOrEmpty(newPaymentStatus)) return;
+            var previous = SelectedOrder.PaymentStatus;
             try
             {
-                IsLoading = true;
+                SelectedOrder.PaymentStatus = newPaymentStatus;
                 await _apiService.UpdateOrderPaymentAsync(SelectedOrder.Id, newPaymentStatus);
-                await LoadOrdersAsync();
             }
             catch (Exception ex)
             {
+                SelectedOrder.PaymentStatus = previous; // rollback
                 ErrorMessage = "Fizetési státusz módosítás sikertelen: " + ex.Message;
-            }
-            finally
-            {
-                IsLoading = false;
             }
         }
     }
