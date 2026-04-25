@@ -126,6 +126,9 @@
                    Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}"/>
 
         <!-- Napló táblázat -->
+        <!-- ScrollViewer.*ScrollBarVisibility="Disabled": ld. DashboardPage.xaml
+             kommentje — a DataGrid belső ScrollViewer-e ne villanjon fel a
+             rendezés / layout-újraszámolás közben. -->
         <DataGrid Grid.Row="3"
                   ItemsSource="{Binding Logs}"
                   AutoGenerateColumns="False"
@@ -142,6 +145,8 @@
                   CanUserResizeRows="False"
                   CanUserResizeColumns="True"
                   HeadersVisibility="Column"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
                   Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibilityConverter}}">
 
             <DataGrid.ColumnHeaderStyle>

@@ -141,6 +141,8 @@
                    Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}"/>
 
         <!-- Rendelések táblázata -->
+        <!-- ScrollViewer.*ScrollBarVisibility="Disabled": ld. DashboardPage.xaml
+             kommentje — a sor rendezéskori görgetősáv-villanást kapcsolja ki. -->
         <DataGrid Grid.Row="2"
                   ItemsSource="{Binding Orders}"
                   SelectedItem="{Binding SelectedOrder}"
@@ -158,6 +160,8 @@
                   CanUserResizeRows="False"
                   CanUserResizeColumns="True"
                   HeadersVisibility="Column"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
                   Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                   Sorting="DataGrid_Sorting">
 

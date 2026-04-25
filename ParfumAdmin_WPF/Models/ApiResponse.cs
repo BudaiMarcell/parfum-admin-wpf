@@ -56,5 +56,23 @@ namespace ParfumAdmin_WPF.Models
 
         [JsonPropertyName("product")]
         public Product Product { get; set; }
+
+        // Kijelzésre szánt név. Ha a termék azóta törlődött (soft-delete),
+        // "(törölve)" utótagot tesz a név végére. Ha a product egyáltalán
+        // null jön vissza (pl. hard-delete-elt sor), egy placeholdert ír.
+        [JsonIgnore]
+        public string DisplayName
+        {
+            get
+            {
+                if (Product == null) return $"#{ProductId} (eltávolítva)";
+                return Product.IsDeleted
+                    ? $"{Product.Name} (törölve)"
+                    : Product.Name;
+            }
+        }
+
+        [JsonIgnore]
+        public bool IsDeletedProduct => Product == null || Product.IsDeleted;
     }
 }

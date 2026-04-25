@@ -1,6 +1,8 @@
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Threading;
 using ParfumAdmin_WPF.ViewModels;
 
@@ -39,6 +41,18 @@ namespace ParfumAdmin_WPF.Views.Pages
             // Any stat box click navigates to the detailed analytics view.
             if (Window.GetWindow(this) is MainWindow main)
                 main.NavigateToPage("Analytics");
+        }
+
+        // Háromfázisú rendezés: Növekvő → Csökkentő → Nincs rendezés.
+        // Ugyanaz a minta, mint a ProductsPage / OrdersPage / CouponsPage tábláin —
+        // ha a felhasználó harmadszor kattint, letörli a rendezést.
+        private void DataGrid_Sorting(object sender, DataGridSortingEventArgs e)
+        {
+            if (e.Column.SortDirection != ListSortDirection.Descending) return;
+            e.Handled = true;
+            e.Column.SortDirection = null;
+            CollectionViewSource.GetDefaultView(((DataGrid)sender).ItemsSource)
+                                ?.SortDescriptions.Clear();
         }
     }
 }

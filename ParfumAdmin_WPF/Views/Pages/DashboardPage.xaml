@@ -82,19 +82,22 @@
                          Margin="0,0,0,24"
                          Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibilityConverter}}">
 
-                <!-- Mai látogatók -->
+                <!-- Mai látogatók: EGYEDI emberek (IP + eszköz-típus fingerprint).
+                     Ha ugyanaz a felhasználó 5 tabot nyit + 12 oldalra kattint, az
+                     akkor is 1 látogató. Az "egy ember = egy látogató" szabály
+                     ennek a kártyának felel meg. -->
                 <Button Style="{StaticResource StatCardButton}" Click="StatBox_Click" Margin="0,0,12,0">
                     <Border Background="#2A2A3E" CornerRadius="10" Padding="20">
                         <StackPanel>
-                            <TextBlock Text="👁 Mai látogatók"
+                            <TextBlock Text="👤 Mai látogatók"
                                        Foreground="#888"
                                        FontSize="12"
                                        Margin="0,0,0,8"/>
-                            <TextBlock Text="{Binding TodayPageviews}"
+                            <TextBlock Text="{Binding TodayUniqueVisitors}"
                                        Foreground="White"
                                        FontSize="32"
                                        FontWeight="Bold"/>
-                            <TextBlock Text="oldalmegtekintés ma"
+                            <TextBlock Text="egyedi látogató ma"
                                        Foreground="#666"
                                        FontSize="11"
                                        Margin="0,4,0,0"/>
@@ -102,19 +105,21 @@
                     </Border>
                 </Button>
 
-                <!-- Mai sessionök -->
+                <!-- Mai oldalmegtekintések: minden pageview eseményt számol.
+                     Egy látogatóhoz több pageview is tartozhat (pl. /main → /shop →
+                     /about = 1 látogató + 3 pageview). -->
                 <Button Style="{StaticResource StatCardButton}" Click="StatBox_Click" Margin="6,0,6,0">
                     <Border Background="#2A2A3E" CornerRadius="10" Padding="20">
                         <StackPanel>
-                            <TextBlock Text="👤 Mai sessionök"
+                            <TextBlock Text="👁 Mai oldalmegtekintések"
                                        Foreground="#888"
                                        FontSize="12"
                                        Margin="0,0,0,8"/>
-                            <TextBlock Text="{Binding TodaySessions}"
+                            <TextBlock Text="{Binding TodayPageviews}"
                                        Foreground="White"
                                        FontSize="32"
                                        FontWeight="Bold"/>
-                            <TextBlock Text="egyedi látogató ma"
+                            <TextBlock Text="{Binding TodaySessions, StringFormat={}{0} session}"
                                        Foreground="#666"
                                        FontSize="11"
                                        Margin="0,4,0,0"/>
@@ -150,7 +155,7 @@
                          Margin="0,0,0,24"
                          Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibilityConverter}}">
 
-                <!-- Heti látogatók -->
+                <!-- Heti látogatók: egyedi IP+eszköz 7 napra. -->
                 <Button Style="{StaticResource StatCardButton}" Click="StatBox_Click" Margin="0,0,12,0">
                     <Border Background="#2A2A3E" CornerRadius="10" Padding="20">
                         <StackPanel>
@@ -158,11 +163,11 @@
                                        Foreground="#888"
                                        FontSize="12"
                                        Margin="0,0,0,8"/>
-                            <TextBlock Text="{Binding WeekPageviews}"
+                            <TextBlock Text="{Binding WeekUniqueVisitors}"
                                        Foreground="White"
                                        FontSize="32"
                                        FontWeight="Bold"/>
-                            <TextBlock Text="elmúlt 7 nap"
+                            <TextBlock Text="{Binding WeekPageviews, StringFormat={}{0} oldalmegtekintés · 7 nap}"
                                        Foreground="#666"
                                        FontSize="11"
                                        Margin="0,4,0,0"/>
@@ -170,7 +175,9 @@
                     </Border>
                 </Button>
 
-                <!-- Heti új látogatók -->
+                <!-- Új látogatók: is_new_visitor flag (első, valaha mért session
+                     az adott IP/user-ről) alapján. Visszatérő IP-k NEM számítanak
+                     bele, akkor sem, ha több mint 30 nap telt el. -->
                 <Button Style="{StaticResource StatCardButton}" Click="StatBox_Click" Margin="6,0,6,0">
                     <Border Background="#2A2A3E" CornerRadius="10" Padding="20">
                         <StackPanel>
@@ -190,7 +197,7 @@
                     </Border>
                 </Button>
 
-                <!-- Havi látogatók -->
+                <!-- Havi látogatók: egyedi IP+eszköz 30 napra. -->
                 <Button Style="{StaticResource StatCardButton}" Click="StatBox_Click" Margin="12,0,0,0">
                     <Border Background="#2A2A3E" CornerRadius="10" Padding="20">
                         <StackPanel>
@@ -198,11 +205,11 @@
                                        Foreground="#888"
                                        FontSize="12"
                                        Margin="0,0,0,8"/>
-                            <TextBlock Text="{Binding MonthPageviews}"
+                            <TextBlock Text="{Binding MonthUniqueVisitors}"
                                        Foreground="White"
                                        FontSize="32"
                                        FontWeight="Bold"/>
-                            <TextBlock Text="elmúlt 30 nap"
+                            <TextBlock Text="{Binding MonthPageviews, StringFormat={}{0} oldalmegtekintés · 30 nap}"
                                        Foreground="#666"
                                        FontSize="11"
                                        Margin="0,4,0,0"/>
@@ -225,6 +232,14 @@
                                FontWeight="SemiBold"
                                Margin="0,0,0,16"/>
 
+                    <!-- ScrollViewer.*ScrollBarVisibility="Disabled": a DataGrid
+                         belső ScrollViewer-ének alapértéke Auto, és a rendezés-
+                         villanást az okozza, hogy kattintáskor a táblázat
+                         újraméri a tartalmat, és egy-két képkockára megjelennek
+                         a belső görgetősávok. A külső lap már scrollozható,
+                         a tábla maga viszont mindig befér a szülőjébe (10 sor,
+                         oszlopok pontos szélességgel), így a belső görgetésre
+                         nincs szükség. -->
                     <DataGrid ItemsSource="{Binding TopProducts}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
@@ -236,9 +251,14 @@
                               GridLinesVisibility="Horizontal"
                               HorizontalGridLinesBrush="#333"
                               CanUserResizeRows="False"
-                              HeadersVisibility="Column">
+                              HeadersVisibility="Column"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                              ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                              Sorting="DataGrid_Sorting">
 
                         <DataGrid.ColumnHeaderStyle>
+                            <!-- Ugyanaz a template, mint a ProductsPage / OrdersPage táblázatoknál:
+                                 beépített ▲/▼ rendezésjelző + bal/jobb oldalon átméretező fogók. -->
                             <Style TargetType="DataGridColumnHeader">
                                 <Setter Property="Background" Value="Transparent"/>
                                 <Setter Property="Foreground" Value="#AAA"/>
@@ -246,18 +266,83 @@
                                 <Setter Property="FontWeight" Value="SemiBold"/>
                                 <Setter Property="BorderBrush" Value="#333"/>
                                 <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="DataGridColumnHeader">
+                                            <Grid>
+                                                <Thumb x:Name="PART_LeftHeaderGripper" HorizontalAlignment="Left" Width="8" Cursor="SizeWE">
+                                                    <Thumb.Template><ControlTemplate TargetType="Thumb"><Border Background="Transparent"/></ControlTemplate></Thumb.Template>
+                                                </Thumb>
+
+                                                <Border Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <ContentPresenter Grid.Column="0"
+                                                                          VerticalAlignment="Center"
+                                                                          HorizontalAlignment="Left"/>
+                                                        <TextBlock x:Name="SortArrow"
+                                                                   Grid.Column="1"
+                                                                   Margin="6,0,0,0"
+                                                                   FontSize="11"
+                                                                   VerticalAlignment="Center"
+                                                                   Foreground="#7C3AED"
+                                                                   Text=""/>
+                                                    </Grid>
+                                                </Border>
+
+                                                <Thumb x:Name="PART_RightHeaderGripper" HorizontalAlignment="Right" Width="8" Cursor="SizeWE">
+                                                    <Thumb.Template><ControlTemplate TargetType="Thumb"><Border Background="Transparent"/></ControlTemplate></Thumb.Template>
+                                                </Thumb>
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="SortDirection" Value="Ascending">
+                                                    <Setter TargetName="SortArrow" Property="Text" Value="▲"/>
+                                                </Trigger>
+                                                <Trigger Property="SortDirection" Value="Descending">
+                                                    <Setter TargetName="SortArrow" Property="Text" Value="▼"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
                             </Style>
                         </DataGrid.ColumnHeaderStyle>
 
                         <DataGrid.RowStyle>
                             <Style TargetType="DataGridRow">
                                 <Setter Property="Foreground" Value="White"/>
+                                <Style.Triggers>
+                                    <!-- Soft-delete-elt vagy eltávolított termékek: halvány,
+                                         dőlt szöveg, hogy vizuálisan megkülönböztethetőek legyenek
+                                         az élő terméksoroktól. -->
+                                    <DataTrigger Binding="{Binding IsDeletedProduct}" Value="True">
+                                        <Setter Property="Foreground" Value="#888"/>
+                                        <Setter Property="FontStyle" Value="Italic"/>
+                                    </DataTrigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#2E2E4E"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#3D2B6B"/>
+                                    </Trigger>
+                                </Style.Triggers>
                             </Style>
                         </DataGrid.RowStyle>
 
                         <DataGrid.Columns>
+                            <!-- DisplayName: a név + "(törölve)" utótag, ha a termék soft-delete-elt.
+                                 SortMemberPath: DisplayName nem közvetlen oszlop — a Product.Name
+                                 szerint rendezünk, hogy az azonos nevű élő/törölt termékek egymás
+                                 mellé kerüljenek. -->
                             <DataGridTextColumn Header="Termék"
-                                                Binding="{Binding Product.Name}"
+                                                Binding="{Binding DisplayName}"
+                                                SortMemberPath="Product.Name"
                                                 Width="*"/>
                             <DataGridTextColumn Header="Kategória"
                                                 Binding="{Binding Product.Category.Name}"

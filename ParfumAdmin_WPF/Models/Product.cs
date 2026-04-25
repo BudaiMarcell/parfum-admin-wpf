@@ -52,6 +52,14 @@ namespace ParfumAdmin_WPF.Models
         [JsonPropertyName("primary_image")]
         public ProductImage PrimaryImage { get; set; }
 
+        // Null, ha a termék él. Ha a Laravel `withTrashed()`-del küldi vissza,
+        // ez a mező kitöltve jön és jelzi, hogy a termék soft-delete-elt.
+        [JsonPropertyName("deleted_at")]
+        public System.DateTime? DeletedAt { get; set; }
+
+        [JsonIgnore]
+        public bool IsDeleted => DeletedAt.HasValue;
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

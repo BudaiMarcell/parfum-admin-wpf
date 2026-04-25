@@ -12,13 +12,16 @@ namespace ParfumAdmin_WPF.Models
 
     public class AnalyticsPeriod
     {
-        [JsonPropertyName("pageviews")]       public int    Pageviews      { get; set; }
-        [JsonPropertyName("unique_sessions")] public int    UniqueSessions { get; set; }
-        [JsonPropertyName("add_to_carts")]    public int    AddToCarts     { get; set; }
-        [JsonPropertyName("checkouts")]       public int    Checkouts      { get; set; }
-        [JsonPropertyName("orders")]          public int    Orders         { get; set; }
-        [JsonPropertyName("new_visitors")]    public int    NewVisitors    { get; set; }
-        [JsonPropertyName("revenue")]         public double Revenue        { get; set; }
+        [JsonPropertyName("pageviews")]        public int    Pageviews       { get; set; }
+        [JsonPropertyName("unique_sessions")]  public int    UniqueSessions  { get; set; }
+        // Egyedi látogatók: IP + eszköz fingerprint (bejelentkezett usernél user_id).
+        // Több session ugyanattól a személytől = 1 látogató.
+        [JsonPropertyName("unique_visitors")]  public int    UniqueVisitors  { get; set; }
+        [JsonPropertyName("add_to_carts")]     public int    AddToCarts      { get; set; }
+        [JsonPropertyName("checkouts")]        public int    Checkouts       { get; set; }
+        [JsonPropertyName("orders")]           public int    Orders          { get; set; }
+        [JsonPropertyName("new_visitors")]     public int    NewVisitors     { get; set; }
+        [JsonPropertyName("revenue")]          public double Revenue         { get; set; }
     }
 
     public class DailyPoint

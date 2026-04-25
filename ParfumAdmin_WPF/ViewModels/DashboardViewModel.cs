@@ -28,6 +28,16 @@ namespace ParfumAdmin_WPF.ViewModels
             set => SetProperty(ref _todaySessions, value);
         }
 
+        // Egyedi látogatók ma: IP + eszköz-típus fingerprint alapján
+        // (backend `unique_visitors` mező). Ha ugyanaz a gép kétszer kinyit
+        // egy tabot, az egy látogató; ha mobilról is ránéz, az kettő.
+        private int _todayUniqueVisitors;
+        public int TodayUniqueVisitors
+        {
+            get => _todayUniqueVisitors;
+            set => SetProperty(ref _todayUniqueVisitors, value);
+        }
+
         private int _activeSessions;
         public int ActiveSessions
         {
@@ -49,11 +59,25 @@ namespace ParfumAdmin_WPF.ViewModels
             set => SetProperty(ref _weekNewVisitors, value);
         }
 
+        private int _weekUniqueVisitors;
+        public int WeekUniqueVisitors
+        {
+            get => _weekUniqueVisitors;
+            set => SetProperty(ref _weekUniqueVisitors, value);
+        }
+
         private int _monthPageviews;
         public int MonthPageviews
         {
             get => _monthPageviews;
             set => SetProperty(ref _monthPageviews, value);
+        }
+
+        private int _monthUniqueVisitors;
+        public int MonthUniqueVisitors
+        {
+            get => _monthUniqueVisitors;
+            set => SetProperty(ref _monthUniqueVisitors, value);
         }
 
         public ICommand RefreshCommand { get; }
@@ -97,15 +121,18 @@ namespace ParfumAdmin_WPF.ViewModels
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
             var today = doc.RootElement.GetProperty("today");
-            TodayPageviews = today.GetProperty("pageviews").GetInt32();
-            TodaySessions = today.GetProperty("unique_sessions").GetInt32();
+            TodayPageviews       = today.GetProperty("pageviews").GetInt32();
+            TodaySessions        = today.GetProperty("unique_sessions").GetInt32();
+            TodayUniqueVisitors  = today.GetProperty("unique_visitors").GetInt32();
 
             var week = doc.RootElement.GetProperty("this_week");
-            WeekPageviews = week.GetProperty("pageviews").GetInt32();
-            WeekNewVisitors = week.GetProperty("new_visitors").GetInt32();
+            WeekPageviews       = week.GetProperty("pageviews").GetInt32();
+            WeekNewVisitors     = week.GetProperty("new_visitors").GetInt32();
+            WeekUniqueVisitors  = week.GetProperty("unique_visitors").GetInt32();
 
             var month = doc.RootElement.GetProperty("this_month");
-            MonthPageviews = month.GetProperty("pageviews").GetInt32();
+            MonthPageviews       = month.GetProperty("pageviews").GetInt32();
+            MonthUniqueVisitors  = month.GetProperty("unique_visitors").GetInt32();
         }
 
         private async Task LoadRealtimeAsync()

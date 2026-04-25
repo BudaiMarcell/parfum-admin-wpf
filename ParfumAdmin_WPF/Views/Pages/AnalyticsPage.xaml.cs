@@ -72,18 +72,19 @@ namespace ParfumAdmin_WPF.Views.Pages
             var maxCount = 0.0;
             foreach (var r in rows) if (r.Count > maxCount) maxCount = r.Count;
 
-            // Bigger bars + taller row gaps so the panel fills the same vertical
-            // real-estate as the hourly chart next to it, instead of leaving
-            // empty space at the bottom.
-            const double BarHeight = 36;
-            const double RowGap    = 22;
+            // A DevicePanel (XAML-ben Grid "*"/"*"/"*" sorokkal) 3 egyforma magas
+            // sávra osztja a rendelkezésre álló függőleges helyet. Itt minden bárt
+            // középre igazítunk a saját során belül, fix magassággal — így a sávok
+            // közötti "rés" egyenletes, és alul nincs kihasználatlan hely.
+            const double BarHeight = 40;
 
+            int rowIndex = 0;
             foreach (var r in rows)
             {
                 double ratio = maxCount > 0 ? r.Count / maxCount : 0;
                 double pct   = total > 0    ? r.Count / total    : 0;
 
-                var row = new Grid { Margin = new Thickness(0, 0, 0, RowGap) };
+                var row = new Grid { VerticalAlignment = VerticalAlignment.Center };
                 row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(130) });
                 row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(140) });
@@ -140,6 +141,7 @@ namespace ParfumAdmin_WPF.Views.Pages
                 Grid.SetColumn(countText, 2);
                 row.Children.Add(countText);
 
+                Grid.SetRow(row, rowIndex++);
                 DevicePanel.Children.Add(row);
             }
         }

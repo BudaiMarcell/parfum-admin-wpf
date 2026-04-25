@@ -168,8 +168,15 @@
                         CornerRadius="10"
                         Padding="20"
                         Margin="10,0,0,0">
-                    <StackPanel>
-                        <Grid Margin="0,0,0,16">
+                    <!-- A külső Grid kitölti a Border belsejét, és a bárok rácsa (Row="1")
+                         "*" méretű, így mindig pont annyi helyet foglal, amennyi a header
+                         után megmarad — ugyanúgy mint a mellette lévő óránkénti chart. -->
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0" Margin="0,0,0,16">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
@@ -185,8 +192,19 @@
                                        FontSize="12"
                                        VerticalAlignment="Center"/>
                         </Grid>
-                        <StackPanel x:Name="DevicePanel" MinHeight="210"/>
-                    </StackPanel>
+                        <!-- Három sor, egyenletes "*" magassággal — a bárok vertikálisan
+                             eloszlanak a rendelkezésre álló helyen, nincs üres sáv alul.
+                             MinHeight=220: megakadályozza, hogy a "*" sorok összeessenek,
+                             amikor a Border Auto méretű Grid.Row-ban van. Így mindig
+                             ugyanakkora, mint a mellette lévő óránkénti chart (Height=220). -->
+                        <Grid x:Name="DevicePanel" Grid.Row="1" MinHeight="220">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                        </Grid>
+                    </Grid>
                 </Border>
             </Grid>
 
