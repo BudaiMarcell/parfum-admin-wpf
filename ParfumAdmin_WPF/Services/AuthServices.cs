@@ -1,7 +1,6 @@
-﻿using ParfumAdmin_WPF.Models;
+using ParfumAdmin_WPF.Models;
 using ParfumAdmin_WPF.Services.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -11,22 +10,23 @@ namespace ParfumAdmin_WPF.Services
     public class AuthService : IAuthService
     {
         private readonly HttpClient _httpClient;
-        private string _token;
-        // 127.0.0.1 instead of "localhost" — on Windows "localhost" resolves to ::1 (IPv6) first
-        // and falls back to 127.0.0.1 after a ~2s timeout if PHP's dev server only listens on IPv4.
-        private const string BaseUrl = "http://127.0.0.1:8000/api";
+        private readonly TokenStore _tokenStore;
+        private readonly IAuthState _authState;
 
-        public AuthService(HttpClient httpClient)
+        public AuthService(HttpClient httpClient, TokenStore tokenStore, IAuthState authState)
         {
+            // BaseAddress on this HttpClient is set in App.OnStartup. Note
+            // that this client deliberately does NOT have AuthDelegatingHandler
+            // installed — login is the entry point that mints a token, so we
+            // don't want a stale token getting attached or the SessionExpired
+            // event firing on a regular failed-password attempt.
             _httpClient = httpClient;
+            _tokenStore = tokenStore;
+            _authState = authState;
         }
 
         public async Task<LoginResponse> LoginAsync(string email, string password)
         {
-            // Stale Authorization header-t töröljük a login előtt,
-            // hogy egy korábbi token ne zavarja a bejelentkezést.
-            _httpClient.DefaultRequestHeaders.Authorization = null;
-
             var payload = new { email, password };
             var json = JsonSerializer.Serialize(payload);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -35,24 +35,26 @@ namespace ParfumAdmin_WPF.Services
             string body;
             try
             {
-                response = await _httpClient.PostAsync($"{BaseUrl}/login", content);
+                response = await _httpClient.PostAsync("login", content);
                 body = await response.Content.ReadAsStringAsync();
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException)
             {
-                throw new Exception(
-                    "Nem sikerült elérni a szervert (" + BaseUrl + "). " +
-                    "Fut a Laravel? Részletek: " + ex.Message);
+                throw new ApiException(
+                    System.Net.HttpStatusCode.ServiceUnavailable,
+                    "Nem sikerült elérni a szervert. Ellenőrizd az internetkapcsolatot.");
             }
-
-            System.Diagnostics.Debug.WriteLine($"LOGIN STATUS: {(int)response.StatusCode} {response.StatusCode}");
-            System.Diagnostics.Debug.WriteLine($"LOGIN BODY:   {body}");
 
             if (!response.IsSuccessStatusCode)
             {
-                // 401 = rossz jelszó, 422 = validációs hiba, egyéb = szerverhiba
-                var shortBody = body.Length > 300 ? body.Substring(0, 300) + "..." : body;
-                throw new Exception($"Bejelentkezés sikertelen ({(int)response.StatusCode}): {shortBody}");
+                string userMessage = (int)response.StatusCode switch
+                {
+                    401 => "Hibás email cím vagy jelszó.",
+                    422 => "Hiányzó vagy érvénytelen adatok.",
+                    429 => "Túl sok próbálkozás. Várj egy percet, és próbáld újra.",
+                    _   => $"Bejelentkezés sikertelen ({(int)response.StatusCode})."
+                };
+                throw new ApiException(response.StatusCode, userMessage);
             }
 
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
@@ -60,24 +62,30 @@ namespace ParfumAdmin_WPF.Services
 
             if (result == null || string.IsNullOrEmpty(result.Token))
             {
-                throw new Exception("A szerver válasza érvénytelen (hiányzó token).");
+                throw new ApiException(
+                    System.Net.HttpStatusCode.OK,
+                    "A szerver válasza érvénytelen.");
             }
 
-            _token = result.Token;
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
+            // Persist via DPAPI so the token survives an app restart. The
+            // AuthDelegatingHandler in front of ApiService picks the token
+            // up from TokenStore on every outgoing request — we don't need
+            // to mutate DefaultRequestHeaders here.
+            _tokenStore.Save(result.Token);
 
             return result;
         }
 
         public void Logout()
         {
-            _token = null;
-            _httpClient.DefaultRequestHeaders.Authorization = null;
+            _tokenStore.Clear();
+            // Tell the UI explicitly. Without this, the user clicks Logout
+            // but stays on the dashboard until the next request 401s.
+            _authState.NotifySessionExpired();
         }
 
-        public bool IsLoggedIn() => !string.IsNullOrEmpty(_token);
+        public bool IsLoggedIn() => !string.IsNullOrEmpty(_tokenStore.Load());
 
-        public string GetToken() => _token;
+        public string GetToken() => _tokenStore.Load() ?? string.Empty;
     }
 }

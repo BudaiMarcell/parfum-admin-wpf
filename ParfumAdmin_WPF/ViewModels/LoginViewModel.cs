@@ -46,10 +46,17 @@ namespace ParfumAdmin_WPF.ViewModels
                 await _authService.LoginAsync(Email, Password);
                 OnLoginSuccess?.Invoke();
             }
-            catch (Exception ex)
+            catch (Services.ApiException apiEx)
             {
-                System.Diagnostics.Debug.WriteLine("HIBA: " + ex.Message);
-                ErrorMessage = ex.Message;
+                // ApiException already carries a user-safe Hungarian message;
+                // just surface it.
+                ErrorMessage = apiEx.UserMessage;
+            }
+            catch (Exception)
+            {
+                // Any other (e.g. JSON parse) error — generic fallback so we
+                // never leak internal details to the login screen.
+                ErrorMessage = "Váratlan hiba történt. Próbáld újra.";
             }
             finally
             {

@@ -12,6 +12,7 @@ namespace ParfumAdmin_WPF.Views.Pages
     {
         private readonly DashboardViewModel _viewModel;
         private readonly DispatcherTimer _realtimeTimer;
+        private Window? _hostWindow;
 
         public DashboardPage(DashboardViewModel viewModel)
         {
@@ -27,13 +28,52 @@ namespace ParfumAdmin_WPF.Views.Pages
             };
             _realtimeTimer.Tick += async (_, _) => await _viewModel.RefreshActiveSessionsAsync();
 
-            Unloaded += (_, _) => _realtimeTimer.Stop();
+            Unloaded += OnUnloaded;
         }
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
             await _viewModel.LoadDataAsync();
-            _realtimeTimer.Start();
+
+            // Pause the heartbeat while the host window is minimized — no
+            // point hitting the realtime endpoint when the dashboard isn't
+            // visible on screen. This both saves bandwidth and keeps the
+            // log clean when the admin steps away.
+            _hostWindow = Window.GetWindow(this);
+            if (_hostWindow != null)
+            {
+                _hostWindow.StateChanged += OnHostStateChanged;
+            }
+
+            // Start only if the window is currently visible.
+            if (_hostWindow?.WindowState != WindowState.Minimized)
+            {
+                _realtimeTimer.Start();
+            }
+        }
+
+        private void OnHostStateChanged(object? sender, EventArgs e)
+        {
+            if (_hostWindow == null) return;
+
+            if (_hostWindow.WindowState == WindowState.Minimized)
+            {
+                _realtimeTimer.Stop();
+            }
+            else
+            {
+                _realtimeTimer.Start();
+            }
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            _realtimeTimer.Stop();
+            if (_hostWindow != null)
+            {
+                _hostWindow.StateChanged -= OnHostStateChanged;
+                _hostWindow = null;
+            }
         }
 
         private void StatBox_Click(object sender, RoutedEventArgs e)

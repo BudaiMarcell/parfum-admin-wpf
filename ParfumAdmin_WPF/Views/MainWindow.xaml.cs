@@ -1,6 +1,8 @@
-﻿using System.Windows;
+using System;
+using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
+using ParfumAdmin_WPF.Services;
 using ParfumAdmin_WPF.Services.Interfaces;
 using ParfumAdmin_WPF.Views.Pages;
 
@@ -9,14 +11,36 @@ namespace ParfumAdmin_WPF.Views
     public partial class MainWindow : Window
     {
         private readonly IAuthService _authService;
+        private readonly IAuthState _authState;
 
-        public MainWindow(IAuthService authService)
+        public MainWindow(IAuthService authService, IAuthState authState)
         {
             InitializeComponent();
             _authService = authService;
+            _authState = authState;
+
+            // Bounce back to the login view when the session ends — either
+            // because the user clicked Logout or because the server returned
+            // 401 (token expired/revoked) on a background request.
+            _authState.SessionExpired += OnSessionExpired;
+            Closed += (_, _) => _authState.SessionExpired -= OnSessionExpired;
 
             // Induláskor a Dashboard oldalt mutatjuk
             NavigateTo("Dashboard");
+        }
+
+        private void OnSessionExpired(object? sender, EventArgs e)
+        {
+            // The handler can fire from a background HTTP thread. Marshal
+            // back to the UI thread before touching window state.
+            Dispatcher.Invoke(() =>
+            {
+                if (!IsLoaded) return;
+
+                var loginWindow = App.ServiceProvider.GetRequiredService<LoginWindow>();
+                loginWindow.Show();
+                Close();
+            });
         }
 
         private void NavButton_Click(object sender, RoutedEventArgs e)
@@ -65,11 +89,9 @@ namespace ParfumAdmin_WPF.Views
             if (dialog.ShowDialog() != true)
                 return;
 
+            // Logout() raises SessionExpired; OnSessionExpired handles the
+            // window swap so we don't duplicate that logic here.
             _authService.Logout();
-
-            var loginWindow = App.ServiceProvider.GetRequiredService<LoginWindow>();
-            loginWindow.Show();
-            this.Close();
         }
     }
 }
